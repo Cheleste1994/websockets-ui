@@ -11,6 +11,7 @@ export const httpServer = http.createServer(function (req, res) {
             res.end(JSON.stringify(err));
             return;
         }
+
         res.writeHead(200);
         res.end(data);
     });
