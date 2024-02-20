@@ -1,11 +1,11 @@
 import { SessionDBType } from "../../db/SessionDB";
 import { UserDBType } from "../../db/UsersDB";
-import { DataMessage } from "../messageHandlers";
+import { DataMessage, DataType } from "../messageHandlers";
 
 type PropsReg = {
   dbUser: UserDBType;
   dbSession: SessionDBType;
-  parsedMessage: DataMessage;
+  parsedMessage: DataMessage<DataType>;
   sessionId: string;
 };
 

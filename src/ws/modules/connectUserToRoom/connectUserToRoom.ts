@@ -1,12 +1,11 @@
 import { GamesRoomType } from "../../db/GameRooms";
 import { SessionDBType } from "../../db/SessionDB";
-import { UserDBType } from "../../db/UsersDB";
 import { DataMessage } from "../messageHandlers";
 
 type PropsCreateRoom = {
   dbSession: SessionDBType;
   dbRoom: GamesRoomType;
-  parsedMessage: DataMessage;
+  parsedMessage: DataMessage<{ indexRoom: number }>;
   sessionId: string;
 };
 

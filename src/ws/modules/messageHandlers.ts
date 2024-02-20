@@ -1,13 +1,16 @@
 import GamesRoom from "../db/GameRooms";
 import { SessionDBType } from "../db/SessionDB";
 import UsersDB from "../db/UsersDB";
+import { addShips, DataShips } from "./addShips/addShips";
 import { connectUserToRoom } from "./connectUserToRoom/connectUserToRoom";
 import { createRoom } from "./createRoom/createRoom";
 import reg from "./reg/reg";
 
-export type DataMessage = {
+export type DataType = { name: string; password: string; indexRoom: number };
+
+export type DataMessage<T> = {
   type: string;
-  data: { name: string; password: string; indexRoom: number };
+  data: T;
   id: number;
 };
 
@@ -24,7 +27,7 @@ export default function messageHandlers(message: string, props: PropsUsers) {
 
   const parsedMessage = JSON.parse(message);
 
-  let { data, type, id } = parsedMessage as DataMessage;
+  let { data, type, id } = parsedMessage as DataMessage<DataType>;
 
   if (typeof data === "string" && data !== "") {
     data = JSON.parse(data);
@@ -52,12 +55,16 @@ export default function messageHandlers(message: string, props: PropsUsers) {
         dbRoom,
         dbSession,
         parsedMessage: { data, type, id },
-        sessionId
-      })
+        sessionId,
+      });
       break;
     case "add_ships":
-      console.log(type);
-      console.log(data);
+      addShips({
+        dbRoom,
+        dbSession,
+        parsedMessage: { data: data as unknown as DataShips, type, id },
+        sessionId,
+      });
       break;
     case "attack":
       console.log(type);
