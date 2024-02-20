@@ -16,14 +16,16 @@ export const connectUserToRoom = (props: PropsCreateRoom) => {
 
   const { data, id } = parsedMessage;
 
-  const room = dbRoom.getRoomByIndex(data.indexRoom);
+  const roomDb = dbRoom.getRoomByIndex(data.indexRoom);
 
-  if (room?.user1.name !== currentUser.name) {
+  if (roomDb?.user1.name !== currentUser.name) {
     const result = dbRoom.connectUserToRoom(data.indexRoom, {
       index: currentUser.id,
       name: currentUser.name,
       sessionId: currentUser.sessionId,
     });
+
+    console.log('Result:', result);
 
     const rooms = dbRoom.getAllRooms().map((room) => ({
       roomId: room.idGame,
@@ -50,11 +52,11 @@ export const connectUserToRoom = (props: PropsCreateRoom) => {
       session.ws.send(responseUpdateRoom);
 
       if (
-        session.id === room?.user1.index ||
-        session.id === room?.user2.index
+        session.id === roomDb?.user1.index ||
+        session.id === roomDb?.user2.index
       ) {
         const dataGame = JSON.stringify({
-          idGame: room.idGame,
+          idGame: roomDb.idGame,
           idPlayer: session.id,
         });
 
@@ -65,11 +67,9 @@ export const connectUserToRoom = (props: PropsCreateRoom) => {
         });
 
         session.ws.send(responseCreateGame);
-
         console.log(`User ${session.name} started the game!`);
       }
     });
-    console.log(result);
   } else {
     console.log("You can not join your room.");
   }

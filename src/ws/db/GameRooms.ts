@@ -1,13 +1,27 @@
-interface UserRomm {
+import { DataShips } from "../modules/addShips/addShips";
+
+export interface Ship {
+  position: {
+    x: number;
+    y: number;
+  };
+  direction: boolean;
+  length: number;
+  type: "small" | "medium" | "large" | "huge";
+}
+
+interface UserRoom {
   index: number;
   name: string;
   sessionId: string;
+  ships?: Ship[];
 }
 
 interface GameRoom {
-  user1: UserRomm;
-  user2: UserRomm;
+  user1: UserRoom;
+  user2: UserRoom;
   idGame: number;
+  indexUser: number;
 }
 
 export type GamesRoomType = InstanceType<typeof GamesRoom>;
@@ -32,17 +46,19 @@ export default class GamesRoom {
         name: "",
         sessionId: "",
       },
+      indexUser: 0,
     });
 
     return this.initialState[newLength - 1].idGame;
   }
 
-  addUserToRoom(idGame: number, user1: UserRomm) {
+  addUserToRoom(idGame: number, user1: UserRoom) {
     const indexRoom = this.initialState.findIndex(
       (room) => room.idGame === idGame
     );
 
     this.initialState[indexRoom].user1 = user1;
+    this.initialState[indexRoom].indexUser = user1.index;
 
     return this.initialState[indexRoom];
   }
@@ -56,17 +72,35 @@ export default class GamesRoom {
     return result;
   }
 
-  connectUserToRoom(idGame: number, user: UserRomm) {
+  getIndexRoomByIdGame(idGame: number) {
     const indexRoom = this.initialState.findIndex(
       (room) => room.idGame === idGame
     );
+
+    return indexRoom;
+  }
+
+  getIndexRoomByIdUser(indexUser: number) {
+    const indexRoom = this.initialState.findIndex(
+      (room) => room.indexUser === indexUser
+    );
+
+    return indexRoom;
+  }
+
+  connectUserToRoom(idGame: number, user: UserRoom) {
+    const indexRoom = this.getIndexRoomByIdGame(idGame);
 
     const room = this.initialState[indexRoom];
 
     if (room && room?.user1.index) {
       room.user2 = user;
 
-      this.deleteRoom(indexRoom);
+      const indexRoomByUser = this.getIndexRoomByIdUser(room.user2.index);
+
+      if (indexRoomByUser !== -1) {
+        this.deleteRoom(indexRoomByUser);
+      }
       return `${user.name} connected!`;
     }
 
@@ -77,5 +111,17 @@ export default class GamesRoom {
     this.initialState.splice(indexRoom, 1);
 
     return this.initialState;
+  }
+
+  addShips({ gameId, ships, indexPlayer }: DataShips) {
+    const room = this.getRoomByIndex(gameId);
+
+    if (room?.user1.index === indexPlayer) {
+      room.user1.ships = ships;
+    } else if (room?.user2.index === indexPlayer) {
+      room.user2.ships = ships;
+    }
+
+    return room;
   }
 }
