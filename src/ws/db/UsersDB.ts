@@ -5,11 +5,10 @@ export interface User {
 
 export interface UserState extends User {
   wins: number;
-  index: number;
   id: number;
 }
 
-export type UserDBType = typeof UsersDB;
+export type UserDBType = InstanceType<typeof UsersDB>;
 
 export default class UsersDB {
   private initialState: UserState[];
@@ -43,7 +42,6 @@ export default class UsersDB {
       name: user.name,
       password: user.password,
       id: this.generateUniqueId(user.name || ""),
-      index: Math.max(this.initialState.length - 1, 0),
       wins: 0,
     });
     return {
@@ -53,8 +51,6 @@ export default class UsersDB {
       errorText: "",
     };
   }
-
-
 
   getPlayerByLogin(name: string) {
     return this.initialState.find((userState) => userState.name === name);

@@ -11,6 +11,7 @@ export interface CurrentUser {
 interface SessionUsers {
   [key: string]: CurrentUser;
 }
+export type SessionDBType = InstanceType<typeof SessionDB>;
 
 export default class SessionDB {
   private initialState: SessionUsers;

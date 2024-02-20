@@ -1,15 +1,16 @@
 import GamesRoom from "../db/GameRooms";
-import SessionDB from "../db/SessionDB";
-import UsersDB from "../db/UsersDB";
+import SessionDB, { SessionDBType } from "../db/SessionDB";
+import UsersDB, { UserDBType } from "../db/UsersDB";
+import reg from "./reg/reg";
 
-type DataMessage = {
+export type DataMessage = {
   type: string;
-  data: { name: string; password: string };
+  data: { name: string; password: string; indexRoom: number };
   id: number;
 };
 
 type PropsUsers = {
-  dbSession: SessionDB;
+  dbSession: SessionDBType;
   sessionId: string;
 };
 
@@ -31,34 +32,11 @@ export default function messageHandlers(message: string, props: PropsUsers) {
 
   switch (type) {
     case "reg":
-      const result = dbUser.authUser({
-        name: data.name,
-        password: data.password,
-      });
-
-      const responseReg = JSON.stringify({
-        type,
-        data: JSON.stringify(result),
-        id,
-      });
-
-      currentUser.ws.send(responseReg, (error) => {
-        if (error || result.error) {
-          dbSession.setAuthUser(sessionId, { name: "", isLogin: false, id: 0 });
-          return;
-        }
-
-        const user = dbUser.getPlayerByLogin(result.name);
-
-        if (user) {
-          dbSession.setAuthUser(sessionId, {
-            name: result.name,
-            isLogin: true,
-            id: user.id,
-          });
-
-          console.log(`User ${result.name} login!`);
-        }
+      reg({
+        dbUser,
+        dbSession,
+        parsedMessage: { data, type, id },
+        sessionId,
       });
       break;
     case "create_room":
@@ -68,7 +46,7 @@ export default function messageHandlers(message: string, props: PropsUsers) {
 
       if (user) {
         dbRoom.addUserToRoom(newRoomId, {
-          index: user.index,
+          index: user.id,
           name: user.name,
           sessionId,
         });
@@ -90,19 +68,74 @@ export default function messageHandlers(message: string, props: PropsUsers) {
           data: dataUpdateRoom,
         });
 
-
         Object.values(dbSession.getAllSessions()).forEach((session) => {
-          session.ws.send(responseUpdateRoom)
-        })
+          session.ws.send(responseUpdateRoom);
+        });
 
         console.log(`Rooms update!`);
       }
       break;
     case "add_user_to_room":
-      console.log(type);
-      console.log(data);
+      const room = dbRoom.getRoomByIndex(data.indexRoom);
+
+      if (room?.user1.name !== currentUser.name) {
+        const result = dbRoom.connectUserToRoom(data.indexRoom, {
+          index: currentUser.id,
+          name: currentUser.name,
+          sessionId: currentUser.sessionId,
+        });
+
+        const rooms = dbRoom.getAllRooms().map((room) => ({
+          roomId: room.idGame,
+          roomUsers: [
+            {
+              name: room.user1.name,
+              index: room.user1.index,
+            },
+            {
+              name: room.user2.name,
+              index: room.user2.index,
+            },
+          ],
+        }));
+
+        const dataUpdateRoom = JSON.stringify(rooms);
+
+        const responseUpdateRoom = JSON.stringify({
+          type: "update_room",
+          data: dataUpdateRoom,
+        });
+
+        Object.values(dbSession.getAllSessions()).forEach((session) => {
+          session.ws.send(responseUpdateRoom);
+
+          if (
+            session.id === room?.user1.index ||
+            session.id === room?.user2.index
+          ) {
+            const dataGame = JSON.stringify({
+              idGame: room.idGame,
+              idPlayer: session.id,
+            });
+
+            const responseCreateGame = JSON.stringify({
+              type: "create_game",
+              data: dataGame,
+              id,
+            });
+
+            session.ws.send(responseCreateGame);
+
+            console.log(`User ${session.name} started the game!`);
+          }
+        });
+        console.log(result);
+      } else {
+        console.log("You can not join your room.");
+      }
       break;
     case "add_ships":
+      console.log(type);
       console.log(type);
       break;
     case "attack":
