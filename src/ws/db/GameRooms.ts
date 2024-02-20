@@ -8,8 +8,9 @@ interface GameRoom {
   user1: UserRomm;
   user2: UserRomm;
   idGame: number;
-  idPlayer: number;
 }
+
+export type GamesRoomType = InstanceType<typeof GamesRoom>;
 
 export default class GamesRoom {
   private initialState: GameRoom[];
@@ -21,7 +22,6 @@ export default class GamesRoom {
   createRoom() {
     const newLength = this.initialState.push({
       idGame: Date.now() + Math.trunc(Math.random() * 100000),
-      idPlayer: 1,
       user1: {
         index: 0,
         name: "",
