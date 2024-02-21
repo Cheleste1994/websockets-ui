@@ -19,6 +19,11 @@ export const connectUserToRoom = (props: PropsCreateRoom) => {
   const roomDb = dbRoom.getRoomByIndex(data.indexRoom);
 
   if (roomDb?.user1.name !== currentUser.name) {
+    if (roomDb?.isFull) {
+      console.log('The room is occupied!')
+      return;
+    }
+
     const result = dbRoom.connectUserToRoom(data.indexRoom, {
       index: currentUser.id,
       name: currentUser.name,

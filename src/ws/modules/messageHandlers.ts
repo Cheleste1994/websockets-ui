@@ -63,7 +63,6 @@ export default function messageHandlers(message: string, props: PropsUsers) {
         dbRoom,
         dbSession,
         parsedMessage: { data: data as unknown as DataShips, type, id },
-        sessionId,
       });
       break;
     case "attack":

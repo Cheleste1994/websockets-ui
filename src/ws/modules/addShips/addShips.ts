@@ -12,30 +12,48 @@ type PropsAddShips = {
   dbSession: SessionDBType;
   dbRoom: GamesRoomType;
   parsedMessage: DataMessage<DataShips>;
-  sessionId: string;
 };
 
 export const addShips = (props: PropsAddShips) => {
-  const { dbSession, sessionId, dbRoom, parsedMessage } = props;
-
-  const currentUser = dbSession.getUserSession(sessionId);
+  const { dbSession, dbRoom, parsedMessage } = props;
 
   const { data, id } = parsedMessage;
 
-  const room = dbRoom.addShips(data);
+  const { room, game } = dbRoom.addShips(data);
 
-  const dataUserGame = JSON.stringify({
-    ships: room?.user1.ships,
-    currentPlayerIndex: room?.user1.index
-  });
+  if (game === "start") {
+    const dataUser1 = JSON.stringify({
+      ships: room?.user1.ships,
+      currentPlayerIndex: room?.user1.index,
+    });
 
-  const responseStartGame = JSON.stringify({
-    type: "start_game",
-    data: dataUserGame,
-    id,
-  });
+    const responseStartGame = JSON.stringify({
+      type: "start_game",
+      data: dataUser1,
+      id,
+    });
 
-  currentUser.ws.send(responseStartGame, () => {
-    console.log("Start game!")
-  });
+    if (room?.user1.sessionId && room?.user2.sessionId) {
+      dbSession
+        .getUserSession(room.user1.sessionId)
+        .ws.send(responseStartGame);
+      dbSession
+        .getUserSession(room.user2.sessionId)
+        .ws.send(responseStartGame);
+
+      const dataTurn = JSON.stringify({
+        currentPlayer: room?.user1.index,
+      });
+
+      const responseTurn = JSON.stringify({
+        type: "turn",
+        data: dataTurn,
+        id,
+      });
+
+      dbSession.getUserSession(room.user1.sessionId).ws.send(responseTurn, () => {
+        console.log(`Game start! Turn: ${room.user1}.`)
+      });
+    }
+  }
 };

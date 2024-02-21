@@ -22,6 +22,7 @@ interface GameRoom {
   user2: UserRoom;
   idGame: number;
   indexUser: number;
+  isFull: boolean;
 }
 
 export type GamesRoomType = InstanceType<typeof GamesRoom>;
@@ -47,6 +48,7 @@ export default class GamesRoom {
         sessionId: "",
       },
       indexUser: 0,
+      isFull: false,
     });
 
     return this.initialState[newLength - 1].idGame;
@@ -59,6 +61,7 @@ export default class GamesRoom {
 
     this.initialState[indexRoom].user1 = user1;
     this.initialState[indexRoom].indexUser = user1.index;
+    this.initialState[indexRoom].isFull = false;
 
     return this.initialState[indexRoom];
   }
@@ -95,12 +98,14 @@ export default class GamesRoom {
 
     if (room && room?.user1.index) {
       room.user2 = user;
+      room.isFull = true;
 
-      const indexRoomByUser = this.getIndexRoomByIdUser(room.user2.index);
+      this.initialState.forEach((state, index) => {
+        if (state.indexUser === room.user2.index) {
+          this.deleteRoom(index);
+        }
+      });
 
-      if (indexRoomByUser !== -1) {
-        this.deleteRoom(indexRoomByUser);
-      }
       return `${user.name} connected!`;
     }
 
@@ -113,7 +118,10 @@ export default class GamesRoom {
     return this.initialState;
   }
 
-  addShips({ gameId, ships, indexPlayer }: DataShips) {
+  addShips({ gameId, ships, indexPlayer }: DataShips): {
+    room: GameRoom | undefined;
+    game: "start" | "wait";
+  } {
     const room = this.getRoomByIndex(gameId);
 
     if (room?.user1.index === indexPlayer) {
@@ -122,6 +130,9 @@ export default class GamesRoom {
       room.user2.ships = ships;
     }
 
-    return room;
+    return {
+      room,
+      game: room?.user1.ships && room?.user2.ships ? "start" : "wait",
+    };
   }
 }
