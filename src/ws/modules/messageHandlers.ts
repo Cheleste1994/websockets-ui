@@ -2,6 +2,7 @@ import GamesRoom from "../db/GameRooms";
 import { SessionDBType } from "../db/SessionDB";
 import UsersDB from "../db/UsersDB";
 import { addShips, DataShips } from "./addShips/addShips";
+import { atack, DataAtack } from "./atack/atack";
 import { connectUserToRoom } from "./connectUserToRoom/connectUserToRoom";
 import { createRoom } from "./createRoom/createRoom";
 import reg from "./reg/reg";
@@ -66,7 +67,11 @@ export default function messageHandlers(message: string, props: PropsUsers) {
       });
       break;
     case "attack":
-      console.log(type);
+      atack({
+        dbRoom,
+        dbSession,
+        parsedMessage: { data: data as unknown as DataAtack, type, id },
+      });
       break;
     case "randomAttack":
       console.log(type);

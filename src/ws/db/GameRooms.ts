@@ -1,4 +1,7 @@
 import { DataShips } from "../modules/addShips/addShips";
+import { Game } from "./Game";
+
+type Field = number[][];
 
 export interface Ship {
   position: {
@@ -10,11 +13,15 @@ export interface Ship {
   type: "small" | "medium" | "large" | "huge";
 }
 
-interface UserRoom {
+interface UserGame {
   index: number;
   name: string;
   sessionId: string;
-  ships?: Ship[];
+}
+
+interface UserRoom extends UserGame {
+  ships: Ship[];
+  field: Field;
 }
 
 interface GameRoom {
@@ -28,10 +35,11 @@ interface GameRoom {
 
 export type GamesRoomType = InstanceType<typeof GamesRoom>;
 
-export default class GamesRoom {
+export default class GamesRoom extends Game {
   private initialState: GameRoom[];
 
   constructor() {
+    super();
     this.initialState = [];
   }
 
@@ -42,11 +50,15 @@ export default class GamesRoom {
         index: 0,
         name: "",
         sessionId: "",
+        field: [],
+        ships: [],
       },
       user2: {
         index: 0,
         name: "",
         sessionId: "",
+        field: [],
+        ships: [],
       },
       indexUser: 0,
       isFull: false,
@@ -56,13 +68,15 @@ export default class GamesRoom {
     return this.initialState[newLength - 1].idGame;
   }
 
-  addUserToRoom(idGame: number, user1: UserRoom) {
+  addUserToRoom(idGame: number, { name, sessionId, index }: UserGame) {
     const indexRoom = this.initialState.findIndex(
       (room) => room.idGame === idGame
     );
 
-    this.initialState[indexRoom].user1 = user1;
-    this.initialState[indexRoom].indexUser = user1.index;
+    this.initialState[indexRoom].user1.index = index;
+    this.initialState[indexRoom].user1.sessionId = sessionId;
+    this.initialState[indexRoom].user1.name = name;
+    this.initialState[indexRoom].indexUser = index;
     this.initialState[indexRoom].isFull = false;
 
     return this.initialState[indexRoom];
@@ -93,13 +107,15 @@ export default class GamesRoom {
     return indexRoom;
   }
 
-  connectUserToRoom(idGame: number, user: UserRoom) {
+  connectUserToRoom(idGame: number, user: UserGame) {
     const indexRoom = this.getIndexRoomByIdGame(idGame);
 
     const room = this.initialState[indexRoom];
 
     if (room && room?.user1.index) {
-      room.user2 = user;
+      room.user2.index = user.index;
+      room.user2.name = user.name;
+      room.user2.sessionId = user.sessionId;
       room.isFull = true;
 
       this.initialState.forEach((state, index) => {
@@ -127,8 +143,10 @@ export default class GamesRoom {
     const room = this.getRoomByIndex(gameId);
 
     if (room?.user1.index === indexPlayer) {
+      room.user1.field = this.createField(ships);
       room.user1.ships = ships;
     } else if (room?.user2.index === indexPlayer) {
+      room.user2.field = this.createField(ships);
       room.user2.ships = ships;
     }
 
@@ -145,5 +163,36 @@ export default class GamesRoom {
       room.turnIndex = indexUser;
     }
     return room;
+  }
+
+  atack(params: { room: GameRoom; indexPlayer: number; x: number; y: number }) {
+    const { indexPlayer, room, x, y } = params;
+
+    if (room.user2.index === indexPlayer) {
+      const index = room.user1.field[y][x];
+      if (index !== -1) {
+        room.user1.ships[index].length -= 1;
+
+        if (room.user1.ships[index].length) {
+          return { status: "shot", currentUser: room.user2 };
+        }
+        return { status: "killed", currentUser: room.user2};
+      } else {
+        return { status: "miss", currentUser: room.user2 };
+      }
+    } else if (room.user1.index === indexPlayer) {
+      const index = room.user2.field[y][x];
+      if (index !== -1) {
+        room.user2.ships[index].length -= 1;
+
+        if (room.user2.ships[index].length) {
+          return { status: "shot", currentUser: room.user1 };
+        }
+        return { status: "killed", currentUser: room.user1 };
+      } else {
+        return { status: "miss", currentUser: room.user1 };
+      }
+    }
+    return { status: "Error", currentUser: room.user1 };
   }
 }
