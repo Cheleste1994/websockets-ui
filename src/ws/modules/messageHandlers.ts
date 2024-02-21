@@ -2,9 +2,10 @@ import GamesRoom from "../db/GameRooms";
 import { SessionDBType } from "../db/SessionDB";
 import UsersDB from "../db/UsersDB";
 import { addShips, DataShips } from "./addShips/addShips";
-import { atack, DataAtack } from "./atack/atack";
+import { attack, DataAttack } from "./attack/attack";
 import { connectUserToRoom } from "./connectUserToRoom/connectUserToRoom";
 import { createRoom } from "./createRoom/createRoom";
+import { DataRandomAttack, randomAttack } from "./randomAttack/randomAttack";
 import reg from "./reg/reg";
 
 export type DataType = { name: string; password: string; indexRoom: number };
@@ -67,14 +68,18 @@ export default function messageHandlers(message: string, props: PropsUsers) {
       });
       break;
     case "attack":
-      atack({
+      attack({
         dbRoom,
         dbSession,
-        parsedMessage: { data: data as unknown as DataAtack, type, id },
+        parsedMessage: { data: data as unknown as DataAttack, type, id },
       });
       break;
     case "randomAttack":
-      console.log(type);
+      randomAttack({
+        dbRoom,
+        dbSession,
+        parsedMessage: { data: data as unknown as DataRandomAttack, type, id },
+      });
       break;
     default:
       console.log("Unknown message type:", type);

@@ -1,23 +1,22 @@
 import { GamesRoomType } from "../../db/GameRooms";
 import { SessionDBType } from "../../db/SessionDB";
 import { responseMessage } from "../../helpers/responseMessage";
-import { DataShips } from "../addShips/addShips";
 import { DataMessage } from "../messageHandlers";
 
-export type DataAtack = {
+export type DataAttack = {
   gameId: number;
   indexPlayer: number;
   x: number;
   y: number;
 };
 
-type PropsAtack = {
+type PropsAttack = {
   dbSession: SessionDBType;
   dbRoom: GamesRoomType;
-  parsedMessage: DataMessage<DataAtack>;
+  parsedMessage: DataMessage<DataAttack>;
 };
 
-export const atack = (props: PropsAtack) => {
+export const attack = (props: PropsAttack) => {
   const { dbSession, dbRoom, parsedMessage } = props;
   const {
     data: { indexPlayer, gameId, x, y },
