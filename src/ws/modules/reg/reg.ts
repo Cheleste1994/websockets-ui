@@ -1,5 +1,6 @@
 import { SessionDBType } from "../../db/SessionDB";
 import { UserDBType } from "../../db/UsersDB";
+import { responseMessage } from "../../helpers/responseMessage";
 import { DataMessage, DataType } from "../messageHandlers";
 
 type PropsReg = {
@@ -12,17 +13,16 @@ type PropsReg = {
 export default function reg(props: PropsReg) {
   const { dbUser, parsedMessage, dbSession, sessionId } = props;
 
-  const { data, id, type } = parsedMessage;
+  const { data, type } = parsedMessage;
 
   const result = dbUser.authUser({
     name: data.name,
     password: data.password,
   });
 
-  const responseReg = JSON.stringify({
+  const responseReg = responseMessage({
     type,
-    data: JSON.stringify(result),
-    id,
+    data: result,
   });
 
   dbSession.getUserSession(sessionId).ws.send(responseReg, (error) => {

@@ -1,5 +1,6 @@
 import { GamesRoomType } from "../../db/GameRooms";
 import { SessionDBType } from "../../db/SessionDB";
+import { responseMessage } from "../../helpers/responseMessage";
 import { DataMessage } from "../messageHandlers";
 
 type PropsCreateRoom = {
@@ -14,13 +15,13 @@ export const connectUserToRoom = (props: PropsCreateRoom) => {
 
   const currentUser = dbSession.getUserSession(sessionId);
 
-  const { data, id } = parsedMessage;
+  const { data } = parsedMessage;
 
   const roomDb = dbRoom.getRoomByIndex(data.indexRoom);
 
   if (roomDb?.user1.name !== currentUser.name) {
     if (roomDb?.isFull) {
-      console.log('The room is occupied!')
+      console.log("The room is occupied!");
       return;
     }
 
@@ -30,7 +31,7 @@ export const connectUserToRoom = (props: PropsCreateRoom) => {
       sessionId: currentUser.sessionId,
     });
 
-    console.log('Result:', result);
+    console.log("Result:", result);
 
     const rooms = dbRoom.getAllRooms().map((room) => ({
       roomId: room.idGame,
@@ -46,11 +47,9 @@ export const connectUserToRoom = (props: PropsCreateRoom) => {
       ],
     }));
 
-    const dataUpdateRoom = JSON.stringify(rooms);
-
-    const responseUpdateRoom = JSON.stringify({
+    const responseUpdateRoom = responseMessage({
       type: "update_room",
-      data: dataUpdateRoom,
+      data: rooms,
     });
 
     Object.values(dbSession.getAllSessions()).forEach((session) => {
@@ -60,15 +59,12 @@ export const connectUserToRoom = (props: PropsCreateRoom) => {
         session.id === roomDb?.user1.index ||
         session.id === roomDb?.user2.index
       ) {
-        const dataGame = JSON.stringify({
-          idGame: roomDb.idGame,
-          idPlayer: session.id,
-        });
-
-        const responseCreateGame = JSON.stringify({
+        const responseCreateGame = responseMessage({
           type: "create_game",
-          data: dataGame,
-          id,
+          data: {
+            idGame: roomDb.idGame,
+            idPlayer: session.id,
+          },
         });
 
         session.ws.send(responseCreateGame);

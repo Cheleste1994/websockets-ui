@@ -23,6 +23,7 @@ interface GameRoom {
   idGame: number;
   indexUser: number;
   isFull: boolean;
+  turnIndex: number;
 }
 
 export type GamesRoomType = InstanceType<typeof GamesRoom>;
@@ -49,6 +50,7 @@ export default class GamesRoom {
       },
       indexUser: 0,
       isFull: false,
+      turnIndex: 0,
     });
 
     return this.initialState[newLength - 1].idGame;
@@ -134,5 +136,14 @@ export default class GamesRoom {
       room,
       game: room?.user1.ships && room?.user2.ships ? "start" : "wait",
     };
+  }
+
+  setTurnUser(idGame: number, indexUser: number) {
+    const room = this.getRoomByIndex(idGame);
+
+    if (room) {
+      room.turnIndex = indexUser;
+    }
+    return room;
   }
 }

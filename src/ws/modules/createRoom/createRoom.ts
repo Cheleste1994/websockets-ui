@@ -1,6 +1,7 @@
 import { GamesRoomType } from "../../db/GameRooms";
 import { SessionDBType } from "../../db/SessionDB";
 import { UserDBType } from "../../db/UsersDB";
+import { responseMessage } from "../../helpers/responseMessage";
 
 type PropsCreateRoom = {
   dbUser: UserDBType;
@@ -35,11 +36,9 @@ export const createRoom = (props: PropsCreateRoom) => {
       ],
     }));
 
-    const dataUpdateRoom = JSON.stringify(rooms);
-
-    const responseUpdateRoom = JSON.stringify({
+    const responseUpdateRoom = responseMessage({
       type: "update_room",
-      data: dataUpdateRoom,
+      data: rooms,
     });
 
     Object.values(dbSession.getAllSessions()).forEach((session) => {
