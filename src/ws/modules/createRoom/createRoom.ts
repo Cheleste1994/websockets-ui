@@ -1,7 +1,7 @@
 import { GamesRoomType } from "../../db/GameRooms";
 import { SessionDBType } from "../../db/SessionDB";
 import { UserDBType } from "../../db/UsersDB";
-import { responseMessage } from "../../helpers/responseMessage";
+import { updateAllRooms } from "../update/updateAllRooms";
 
 type PropsCreateRoom = {
   dbUser: UserDBType;
@@ -26,25 +26,6 @@ export const createRoom = (props: PropsCreateRoom) => {
       sessionId,
     });
 
-    const rooms = dbRoom.getAllRooms().map((room) => ({
-      roomId: room.idGame,
-      roomUsers: [
-        {
-          name: room.user1.name,
-          index: room.user1.index,
-        },
-      ],
-    }));
-
-    const responseUpdateRoom = responseMessage({
-      type: "update_room",
-      data: rooms,
-    });
-
-    Object.values(dbSession.getAllSessions()).forEach((session) => {
-      session.ws.send(responseUpdateRoom);
-    });
-
-    console.log(`Rooms update!`);
+    updateAllRooms({ dbRoom, dbSession });
   }
 };

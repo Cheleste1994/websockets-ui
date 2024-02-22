@@ -24,7 +24,7 @@ interface UserRoom extends UserGame {
   field: Field;
 }
 
-interface GameRoom {
+export interface GameRoom {
   user1: UserRoom;
   user2: UserRoom;
   idGame: number;
@@ -82,7 +82,11 @@ export default class GamesRoom extends Game {
     return this.initialState[indexRoom];
   }
 
-  getAllRooms() {
+  getAllRooms({ hideFull }: { hideFull?: true } = {}) {
+    if (hideFull) {
+      return this.initialState.filter((room) => !room.isFull);
+    }
+
     return this.initialState;
   }
 
@@ -131,7 +135,9 @@ export default class GamesRoom extends Game {
   }
 
   deleteRoom(indexRoom: number) {
-    this.initialState.splice(indexRoom, 1);
+    if (indexRoom !== -1) {
+      this.initialState.splice(indexRoom, 1);
+    }
 
     return this.initialState;
   }
@@ -165,34 +171,55 @@ export default class GamesRoom extends Game {
     return room;
   }
 
-  atack(params: { room: GameRoom; indexPlayer: number; x: number; y: number }) {
+  atack(params: {
+    room: GameRoom;
+    indexPlayer: number;
+    x: number;
+    y: number;
+  }): { status: "shot" | "killed" | "miss" | "Error"; currentUser: UserRoom } {
     const { indexPlayer, room, x, y } = params;
+    try {
+      if (room.user2.index === indexPlayer) {
+        const index = room.user1.field[y][x];
+        if (index !== -1) {
+          room.user1.ships[index].length -= 1;
 
-    if (room.user2.index === indexPlayer) {
-      const index = room.user1.field[y][x];
-      if (index !== -1) {
-        room.user1.ships[index].length -= 1;
-
-        if (room.user1.ships[index].length) {
-          return { status: "shot", currentUser: room.user2 };
+          if (room.user1.ships[index].length) {
+            return { status: "shot", currentUser: room.user2 };
+          }
+          return { status: "killed", currentUser: room.user2 };
+        } else {
+          return { status: "miss", currentUser: room.user2 };
         }
-        return { status: "killed", currentUser: room.user2};
-      } else {
-        return { status: "miss", currentUser: room.user2 };
-      }
-    } else if (room.user1.index === indexPlayer) {
-      const index = room.user2.field[y][x];
-      if (index !== -1) {
-        room.user2.ships[index].length -= 1;
+      } else if (room.user1.index === indexPlayer) {
+        const index = room.user2.field[y][x];
+        if (index !== -1) {
+          room.user2.ships[index].length -= 1;
 
-        if (room.user2.ships[index].length) {
-          return { status: "shot", currentUser: room.user1 };
+          if (room.user2.ships[index].length) {
+            return { status: "shot", currentUser: room.user1 };
+          }
+          return { status: "killed", currentUser: room.user1 };
+        } else {
+          return { status: "miss", currentUser: room.user1 };
         }
-        return { status: "killed", currentUser: room.user1 };
-      } else {
-        return { status: "miss", currentUser: room.user1 };
       }
+      return { status: "Error", currentUser: room.user1 };
+    } catch(Error) {
+      return { status: "Error", currentUser: room.user1 };
     }
-    return { status: "Error", currentUser: room.user1 };
+  }
+
+  deleteRoomIfUserDisconect(idUser: number) {
+    const indexRoom = this.initialState.findIndex(
+      (room) => room.user1.index === idUser || room.user2.index === idUser
+    );
+    if (indexRoom !== -1) {
+      this.deleteRoom(indexRoom);
+
+      return `Room with user ID ${idUser} is closed!`;
+    }
+
+    return "Error delete room!";
   }
 }

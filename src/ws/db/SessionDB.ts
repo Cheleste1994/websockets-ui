@@ -46,16 +46,6 @@ export default class SessionDB {
     return this.initialState[sessionId];
   }
 
-  getAllNameAndStatus() {
-    const users = Object.entries(this.initialState).map(
-      ([key, { name, isLogin }]) => ({
-        [key]: { name, isLogin },
-      })
-    );
-
-    return users;
-  }
-
   getAllSessions() {
     return this.initialState;
   }

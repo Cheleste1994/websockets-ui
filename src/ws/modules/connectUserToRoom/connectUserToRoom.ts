@@ -2,6 +2,7 @@ import { GamesRoomType } from "../../db/GameRooms";
 import { SessionDBType } from "../../db/SessionDB";
 import { responseMessage } from "../../helpers/responseMessage";
 import { DataMessage } from "../messageHandlers";
+import { updateAllRooms } from "../update/updateAllRooms";
 
 type PropsCreateRoom = {
   dbSession: SessionDBType;
@@ -33,44 +34,28 @@ export const connectUserToRoom = (props: PropsCreateRoom) => {
 
     console.log("Result:", result);
 
-    const rooms = dbRoom.getAllRooms().map((room) => ({
-      roomId: room.idGame,
-      roomUsers: [
-        {
-          name: room.user1.name,
-          index: room.user1.index,
+    updateAllRooms({ dbRoom, dbSession });
+
+    const responseCreateGame = (idPlayer: number) =>
+      responseMessage({
+        type: "create_game",
+        data: {
+          idGame: roomDb?.idGame,
+          idPlayer,
         },
-        {
-          name: room.user2.name,
-          index: room.user2.index,
-        },
-      ],
-    }));
+      });
+    if (roomDb?.user1.index && roomDb?.user2.index) {
+      dbSession
+        .getUserSession(roomDb.user1.sessionId)
+        ?.ws.send(responseCreateGame(roomDb.user1.index));
+      dbSession
+        .getUserSession(roomDb.user2.sessionId)
+        ?.ws.send(responseCreateGame(roomDb.user2.index));
 
-    const responseUpdateRoom = responseMessage({
-      type: "update_room",
-      data: rooms,
-    });
-
-    Object.values(dbSession.getAllSessions()).forEach((session) => {
-      session.ws.send(responseUpdateRoom);
-
-      if (
-        session.id === roomDb?.user1.index ||
-        session.id === roomDb?.user2.index
-      ) {
-        const responseCreateGame = responseMessage({
-          type: "create_game",
-          data: {
-            idGame: roomDb.idGame,
-            idPlayer: session.id,
-          },
-        });
-
-        session.ws.send(responseCreateGame);
-        console.log(`User ${session.name} started the game!`);
-      }
-    });
+      console.log(
+        `Users ${roomDb.user1.name} and ${roomDb.user2.name} started the game!`
+      );
+    }
   } else {
     console.log("You can not join your room.");
   }

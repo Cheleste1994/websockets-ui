@@ -32,8 +32,12 @@ export const addShips = (props: PropsAddShips) => {
     });
 
     if (room?.user1.sessionId && room?.user2.sessionId) {
-      dbSession.getUserSession(room.user1.sessionId).ws.send(responseStartGame);
-      dbSession.getUserSession(room.user2.sessionId).ws.send(responseStartGame);
+      dbSession
+        .getUserSession(room.user1.sessionId)
+        ?.ws.send(responseStartGame);
+      dbSession
+        .getUserSession(room.user2.sessionId)
+        ?.ws.send(responseStartGame);
 
       const responseTurn = responseMessage({
         type: "turn",
@@ -44,9 +48,11 @@ export const addShips = (props: PropsAddShips) => {
 
       dbSession
         .getUserSession(room.user1.sessionId)
-        .ws.send(responseTurn, () => {
+        ?.ws.send(responseTurn, () => {
           room.turnIndex = room.user1.index;
-          console.log(`Game start! Turn name - ${room.user1.name}, ID - ${room.user1.index}.`);
+          console.log(
+            `Game start! Turn name - ${room.user1.name}, ID - ${room.user1.index}.`
+          );
         });
     }
   }

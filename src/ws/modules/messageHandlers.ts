@@ -1,12 +1,13 @@
-import GamesRoom from "../db/GameRooms";
+import GamesRoom, { GamesRoomType } from "../db/GameRooms";
 import { SessionDBType } from "../db/SessionDB";
-import UsersDB from "../db/UsersDB";
+import UsersDB, { UserDBType } from "../db/UsersDB";
 import { addShips, DataShips } from "./addShips/addShips";
 import { attack, DataAttack } from "./attack/attack";
 import { connectUserToRoom } from "./connectUserToRoom/connectUserToRoom";
 import { createRoom } from "./createRoom/createRoom";
 import { DataRandomAttack, randomAttack } from "./randomAttack/randomAttack";
 import reg from "./reg/reg";
+import { updateSession } from "./update/updateSession";
 
 export type DataType = { name: string; password: string; indexRoom: number };
 
@@ -18,14 +19,13 @@ export type DataMessage<T> = {
 
 type PropsUsers = {
   dbSession: SessionDBType;
+  dbRoom: GamesRoomType;
+  dbUser: UserDBType;
   sessionId: string;
 };
 
-const dbUser = new UsersDB();
-const dbRoom = new GamesRoom();
-
 export default function messageHandlers(message: string, props: PropsUsers) {
-  const { dbSession, sessionId } = props;
+  const { dbSession, sessionId, dbRoom, dbUser } = props;
 
   const parsedMessage = JSON.parse(message);
 
@@ -43,6 +43,7 @@ export default function messageHandlers(message: string, props: PropsUsers) {
         parsedMessage: { data, type, id },
         sessionId,
       });
+      updateSession({ dbRoom, dbSession, sessionId });
       break;
     case "create_room":
       createRoom({
