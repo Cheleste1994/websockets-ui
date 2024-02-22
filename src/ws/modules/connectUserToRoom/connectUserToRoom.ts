@@ -53,7 +53,7 @@ export const connectUserToRoom = (props: PropsCreateRoom) => {
         ?.ws.send(responseCreateGame(roomDb.user2.index));
 
       console.log(
-        `Users ${roomDb.user1.name} and ${roomDb.user2.name} started the game!`
+        `Users ${roomDb.user1.name} and ${roomDb.user2.name} install ships!`
       );
     }
   } else {

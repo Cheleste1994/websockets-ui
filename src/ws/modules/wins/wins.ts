@@ -35,10 +35,10 @@ export const wins = (props: PropsWins) => {
     dbSession
       .getUserSession(currentRoom.user2.sessionId)
       ?.ws.send(responseTurn, () => {
-        console.log(`Winner ID: ${currentRoom.turnIndex}!`);
+        console.log(`Finish. Winner ID: ${currentRoom.turnIndex}!`);
       });
     isWin = true;
   }
 
-  return { isWin };
+  return { isWin, indexPlayerWin: isWin ? currentRoom.turnIndex : -1 };
 };

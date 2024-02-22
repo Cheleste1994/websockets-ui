@@ -32,8 +32,20 @@ export const addShips = (props: PropsAddShips) => {
     });
 
     if (room?.user1.sessionId && room?.user2.sessionId) {
-      dbSession.getUserSession(room.user1.sessionId).ws.send(responseStartGame);
-      dbSession.getUserSession(room.user2.sessionId).ws.send(responseStartGame);
+      dbSession
+        .getUserSession(room.user1.sessionId)
+        .ws.send(responseStartGame, () => {
+          console.log(`User ${room.user1.name} added ships`);
+        });
+      dbSession
+        .getUserSession(room.user2.sessionId)
+        .ws.send(responseStartGame, () => {
+          console.log(`User ${room.user2.name} added ships`);
+
+          console.log(
+            `Users ${room.user1.name} and ${room.user2.name} started the game!`
+          );
+        });
 
       const responseTurn = responseMessage({
         type: "turn",
@@ -46,7 +58,9 @@ export const addShips = (props: PropsAddShips) => {
         .getUserSession(room.user1.sessionId)
         .ws.send(responseTurn, () => {
           room.turnIndex = room.user1.index;
-          console.log(`Game start! Turn name - ${room.user1.name}, ID - ${room.user1.index}.`);
+          console.log(
+            `Turn name - ${room.user1.name}, ID - ${room.user1.index}.`
+          );
         });
     }
   }

@@ -52,6 +52,18 @@ export default class UsersDB {
     };
   }
 
+  addWinByUserIndex(userIndex: number) {
+    const user = this.getPlayerByIndex(userIndex);
+
+    if (user) {
+      user.wins += 1;
+    }
+  }
+
+  getPlayerByIndex(id: number) {
+    return this.initialState.find((userState) => userState.id === id);
+  }
+
   getPlayerByLogin(name: string) {
     return this.initialState.find((userState) => userState.name === name);
   }

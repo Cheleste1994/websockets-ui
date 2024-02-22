@@ -8,7 +8,6 @@ import { createRoom } from "./createRoom/createRoom";
 import { DataRandomAttack, randomAttack } from "./randomAttack/randomAttack";
 import reg from "./reg/reg";
 import { updateAllRooms } from "./update/updateAllRooms";
-import { updateSession } from "./update/updateSession";
 import { updateWinners } from "./update/updateWinners";
 
 export type DataType = { name: string; password: string; indexRoom: number };
@@ -84,11 +83,17 @@ export default function messageHandlers(message: string, props: PropsUsers) {
       });
       break;
     case "attack":
-      attack({
+      const { isWin, indexPlayerWin } = attack({
         dbRoom,
         dbSession,
         parsedMessage: { data: data as unknown as DataAttack, type, id },
       });
+
+      if (indexPlayerWin !== -1 && isWin) {
+        dbUser.addWinByUserIndex(indexPlayerWin);
+
+        updateWinners({ dbSession, dbUser });
+      }
       break;
     case "randomAttack":
       randomAttack({

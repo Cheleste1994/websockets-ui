@@ -29,12 +29,12 @@ export const attack = (props: PropsAttack) => {
 
   if (!currentRoom) {
     console.log(`Room not found!`);
-    return;
+    return { isWin: false, indexPlayerWin: -1 };
   }
 
   if (currentRoom?.turnIndex !== indexPlayer) {
     console.log(`Another user's turn!`);
-    return;
+    return { isWin: false, indexPlayerWin: -1 };
   }
 
   if (currentRoom) {
@@ -69,7 +69,7 @@ export const attack = (props: PropsAttack) => {
         : currentRoom.user1.index;
 
     if (status === "killed" || status === "shot") {
-      const { isWin } = wins({
+      const { isWin, indexPlayerWin } = wins({
         currentRoom,
         dbSession,
         nextPlayer,
@@ -79,6 +79,8 @@ export const attack = (props: PropsAttack) => {
         const indexRoom = dbRoom.getIndexRoomByIdGame(gameId);
         dbRoom.deleteRoom(indexRoom);
         updateAllRooms({ dbRoom, dbSession });
+
+        return { isWin, indexPlayerWin }
       }
 
       nextPlayer = indexPlayer;
@@ -98,4 +100,6 @@ export const attack = (props: PropsAttack) => {
       dbSession.getUserSession(room?.user2.sessionId)?.ws.send(responseTurn);
     }
   }
+
+  return { isWin: false, indexPlayerWin: -1 }
 };
