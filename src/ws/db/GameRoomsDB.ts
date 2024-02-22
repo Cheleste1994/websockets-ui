@@ -123,7 +123,7 @@ export default class GamesRoomDB extends Game {
       room.isFull = true;
 
       this.initialState.forEach((state, index) => {
-        if (state.indexUser === room.user2.index) {
+        if (state.indexUser === user.index) {
           this.deleteRoom(index);
         }
       });

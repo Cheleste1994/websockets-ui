@@ -13,6 +13,15 @@ type PropsCreateRoom = {
 export const createRoom = (props: PropsCreateRoom) => {
   const { dbUser, dbSession, sessionId, dbRoom } = props;
 
+  const currentUser = dbSession.getUserSession(sessionId)
+
+  const roomIndex = dbRoom.getIndexRoomByIdUser(currentUser.id)
+
+  if (roomIndex !== -1 ) {
+    console.log(`User ${currentUser.name} already created a room!`)
+    return;
+  }
+
   const newRoomId = dbRoom.createRoom();
 
   console.log(`Room ID - ${newRoomId} created`);

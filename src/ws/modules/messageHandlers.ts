@@ -7,7 +7,9 @@ import { connectUserToRoom } from "./connectUserToRoom/connectUserToRoom";
 import { createRoom } from "./createRoom/createRoom";
 import { DataRandomAttack, randomAttack } from "./randomAttack/randomAttack";
 import reg from "./reg/reg";
+import { updateAllRooms } from "./update/updateAllRooms";
 import { updateSession } from "./update/updateSession";
+import { updateWinners } from "./update/updateWinners";
 
 export type DataType = { name: string; password: string; indexRoom: number };
 
@@ -38,7 +40,7 @@ export default function messageHandlers(message: string, props: PropsUsers) {
   console.group(`Received message ↓`);
   console.log(`Type: ${type}, ID: ${id}`);
   console.log(data);
-  console.groupEnd()
+  console.groupEnd();
 
   switch (type) {
     case "reg":
@@ -48,7 +50,15 @@ export default function messageHandlers(message: string, props: PropsUsers) {
         parsedMessage: { data, type, id },
         sessionId,
       });
-      updateSession({ dbRoom, dbSession, sessionId });
+      const update = () => {
+        updateAllRooms({ dbRoom, dbSession });
+        updateWinners({
+          dbSession,
+          dbUser,
+        });
+      };
+
+      setTimeout(update, 0);
       break;
     case "create_room":
       createRoom({

@@ -63,17 +63,6 @@ export default class UsersDB {
     );
   }
 
-  updateWinsUser(user: User) {
-    const index = this.indexPlayerByLoginAndPassword(user);
-
-    if (index !== -1) {
-      return "Invalid user login or password";
-    }
-
-    this.initialState[index] = { ...this.initialState[index], ...user };
-    return "User update!";
-  }
-
   getAllUsers() {
     return this.initialState;
   }
