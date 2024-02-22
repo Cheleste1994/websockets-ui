@@ -1,6 +1,6 @@
-import GamesRoom, { GamesRoomType } from "../db/GameRooms";
+import { GamesRoomDBType } from "../db/GameRoomsDB";
 import { SessionDBType } from "../db/SessionDB";
-import UsersDB, { UserDBType } from "../db/UsersDB";
+import { UserDBType } from "../db/UsersDB";
 import { addShips, DataShips } from "./addShips/addShips";
 import { attack, DataAttack } from "./attack/attack";
 import { connectUserToRoom } from "./connectUserToRoom/connectUserToRoom";
@@ -19,7 +19,7 @@ export type DataMessage<T> = {
 
 type PropsUsers = {
   dbSession: SessionDBType;
-  dbRoom: GamesRoomType;
+  dbRoom: GamesRoomDBType;
   dbUser: UserDBType;
   sessionId: string;
 };
@@ -34,6 +34,11 @@ export default function messageHandlers(message: string, props: PropsUsers) {
   if (typeof data === "string" && data !== "") {
     data = JSON.parse(data);
   }
+
+  console.group(`Received message ↓`);
+  console.log(`Type: ${type}, ID: ${id}`);
+  console.log(data);
+  console.groupEnd()
 
   switch (type) {
     case "reg":

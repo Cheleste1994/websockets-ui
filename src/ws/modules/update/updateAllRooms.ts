@@ -1,10 +1,10 @@
-import { GamesRoomType } from "../../db/GameRooms";
+import { GamesRoomDBType } from "../../db/GameRoomsDB";
 import { SessionDBType } from "../../db/SessionDB";
 import { responseMessage } from "../../helpers/responseMessage";
 
 type PropsUpdateAllRooms = {
   dbSession: SessionDBType;
-  dbRoom: GamesRoomType;
+  dbRoom: GamesRoomDBType;
 };
 
 export const updateAllRooms = (props: PropsUpdateAllRooms) => {

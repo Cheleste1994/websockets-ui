@@ -1,9 +1,9 @@
-import { GameRoom, Ship } from "../../db/GameRooms";
+import { GameRoomDB, Ship } from "../../db/GameRoomsDB";
 import { SessionDBType } from "../../db/SessionDB";
 import { responseMessage } from "../../helpers/responseMessage";
 
 type PropsWins = {
-  currentRoom: GameRoom;
+  currentRoom: GameRoomDB;
   dbSession: SessionDBType;
   nextPlayer: number;
 };
@@ -11,7 +11,7 @@ type PropsWins = {
 export const wins = (props: PropsWins) => {
   const { currentRoom, dbSession, nextPlayer } = props;
 
-  const filter = (ships: Ship[]) => ships.filter((ship) => ship.length);
+  const filter = (ships: Ship[]) => ships.filter((ship) => ship.length > 0);
 
   const result = filter(
     currentRoom.user1.index === nextPlayer

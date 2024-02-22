@@ -1,4 +1,4 @@
-import { GamesRoomType } from "../../db/GameRooms";
+import { GamesRoomDBType } from "../../db/GameRoomsDB";
 import { SessionDBType } from "../../db/SessionDB";
 import { attack } from "../attack/attack";
 import { DataMessage } from "../messageHandlers";
@@ -10,7 +10,7 @@ export type DataRandomAttack = {
 
 type PropsAtack = {
   dbSession: SessionDBType;
-  dbRoom: GamesRoomType;
+  dbRoom: GamesRoomDBType;
   parsedMessage: DataMessage<DataRandomAttack>;
 };
 
@@ -36,5 +36,7 @@ export const randomAttack = (props: PropsAtack) => {
         data: { gameId, indexPlayer, x, y },
       },
     });
+
+    console.log(`Random attack: x - ${x}, y - ${y}`);
   }
 };

@@ -24,7 +24,7 @@ interface UserRoom extends UserGame {
   field: Field;
 }
 
-export interface GameRoom {
+export interface GameRoomDB {
   user1: UserRoom;
   user2: UserRoom;
   idGame: number;
@@ -33,10 +33,10 @@ export interface GameRoom {
   turnIndex: number;
 }
 
-export type GamesRoomType = InstanceType<typeof GamesRoom>;
+export type GamesRoomDBType = InstanceType<typeof GamesRoomDB>;
 
-export default class GamesRoom extends Game {
-  private initialState: GameRoom[];
+export default class GamesRoomDB extends Game {
+  private initialState: GameRoomDB[];
 
   constructor() {
     super();
@@ -143,7 +143,7 @@ export default class GamesRoom extends Game {
   }
 
   addShips({ gameId, ships, indexPlayer }: DataShips): {
-    room: GameRoom | undefined;
+    room: GameRoomDB | undefined;
     game: "start" | "wait";
   } {
     const room = this.getRoomByIndex(gameId);
@@ -156,9 +156,15 @@ export default class GamesRoom extends Game {
       room.user2.ships = ships;
     }
 
+    const isStart =
+      room?.user1.ships &&
+      room?.user2.ships &&
+      room.user1.ships.length > 0 &&
+      room?.user2.ships.length > 0;
+
     return {
       room,
-      game: room?.user1.ships && room?.user2.ships ? "start" : "wait",
+      game: isStart ? "start" : "wait",
     };
   }
 
@@ -172,7 +178,7 @@ export default class GamesRoom extends Game {
   }
 
   atack(params: {
-    room: GameRoom;
+    room: GameRoomDB;
     indexPlayer: number;
     x: number;
     y: number;
@@ -205,7 +211,7 @@ export default class GamesRoom extends Game {
         }
       }
       return { status: "Error", currentUser: room.user1 };
-    } catch(Error) {
+    } catch (Error) {
       return { status: "Error", currentUser: room.user1 };
     }
   }

@@ -1,4 +1,4 @@
-import { GamesRoomType, Ship } from "../../db/GameRooms";
+import { GamesRoomDBType, Ship } from "../../db/GameRoomsDB";
 import { SessionDBType } from "../../db/SessionDB";
 import { responseMessage } from "../../helpers/responseMessage";
 import { DataMessage } from "../messageHandlers";
@@ -11,7 +11,7 @@ export type DataShips = {
 
 type PropsAddShips = {
   dbSession: SessionDBType;
-  dbRoom: GamesRoomType;
+  dbRoom: GamesRoomDBType;
   parsedMessage: DataMessage<DataShips>;
 };
 
@@ -32,12 +32,8 @@ export const addShips = (props: PropsAddShips) => {
     });
 
     if (room?.user1.sessionId && room?.user2.sessionId) {
-      dbSession
-        .getUserSession(room.user1.sessionId)
-        ?.ws.send(responseStartGame);
-      dbSession
-        .getUserSession(room.user2.sessionId)
-        ?.ws.send(responseStartGame);
+      dbSession.getUserSession(room.user1.sessionId).ws.send(responseStartGame);
+      dbSession.getUserSession(room.user2.sessionId).ws.send(responseStartGame);
 
       const responseTurn = responseMessage({
         type: "turn",
@@ -48,11 +44,9 @@ export const addShips = (props: PropsAddShips) => {
 
       dbSession
         .getUserSession(room.user1.sessionId)
-        ?.ws.send(responseTurn, () => {
+        .ws.send(responseTurn, () => {
           room.turnIndex = room.user1.index;
-          console.log(
-            `Game start! Turn name - ${room.user1.name}, ID - ${room.user1.index}.`
-          );
+          console.log(`Game start! Turn name - ${room.user1.name}, ID - ${room.user1.index}.`);
         });
     }
   }

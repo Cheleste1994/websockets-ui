@@ -1,4 +1,4 @@
-import { Ship } from "./GameRooms";
+import { Ship } from "./GameRoomsDB";
 
 export class Game {
   createField(ships: Ship[]) {
